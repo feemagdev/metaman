@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
-class BscService with ChangeNotifier {
+class BscService {
   getUserBalance() {}
 }
