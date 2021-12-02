@@ -1,4 +1,5 @@
 import 'package:crypto_exchange/pages/bsc_address_page.dart';
+import 'package:crypto_exchange/route_generator.dart';
 import 'package:crypto_exchange/services/bsc_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,8 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.purple,
           fontFamily: 'Montserrat',
         ),
-        home: BscServicePage(),
+        onGenerateRoute: RouteGenerator.generateRoute,
+        initialRoute: BscAddressPage.routeID,
       ),
     );
   }

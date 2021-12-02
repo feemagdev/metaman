@@ -1,12 +1,13 @@
-import 'package:crypto_exchange/pages/bsc_wallet_page.dart';
+import 'package:crypto_exchange/pages/bottom_navigation_drawer.dart';
 import 'package:crypto_exchange/services/bsc_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class BscServicePage extends StatelessWidget {
+class BscAddressPage extends StatelessWidget {
+  static const String routeID = 'bsc_address_page';
   final TextEditingController _bscAddressController = TextEditingController();
 
-  BscServicePage({Key? key}) : super(key: key);
+  BscAddressPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,14 @@ class BscServicePage extends StatelessWidget {
             child: Scaffold(
               floatingActionButton: OutlinedButton(
                 onPressed: () async {
-                  await bsc.getUserBalance(_bscAddressController.text);
+                  if (_bscAddressController.text.length == 42) {
+                    await bsc.getUserBalance(_bscAddressController.text);
+                    if (bsc.wrong) {
+                      print('run');
+                      return;
+                    }
+                  }
+
                   _moveToWalletPage(context);
                 },
                 child: const Text(
@@ -76,16 +84,18 @@ class BscServicePage extends StatelessWidget {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
-                          child: TextField(
-                            controller: _bscAddressController,
-                            decoration: InputDecoration(
-                              hintText: 'Your BSC Address',
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                    width: 2.0, color: Colors.black),
+                          child: Form(
+                            child: TextField(
+                              controller: _bscAddressController,
+                              decoration: InputDecoration(
+                                hintText: 'Your BSC Address',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                      width: 2.0, color: Colors.black),
+                                ),
                               ),
                             ),
                           ),
@@ -100,12 +110,6 @@ class BscServicePage extends StatelessWidget {
   }
 
   void _moveToWalletPage(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return const BscWalletPage();
-        },
-      ),
-    );
+    Navigator.of(context).pushReplacementNamed(BscWalletPage.routeID);
   }
 }
