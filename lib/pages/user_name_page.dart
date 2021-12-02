@@ -1,60 +1,27 @@
 import 'package:crypto_exchange/pages/bottom_navigation_drawer.dart';
-import 'package:crypto_exchange/pages/user_name_page.dart';
-import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class BscAddressPage extends StatelessWidget {
-  static const String routeID = 'bsc_address_page';
-  final TextEditingController _bscAddressController = TextEditingController();
+class UserNamePage extends StatelessWidget {
+  static const String routeID = 'username_page';
+  final TextEditingController _userNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  BscAddressPage({Key? key}) : super(key: key);
+  UserNamePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final userService = Provider.of<UserService>(context, listen: true);
-
-    if (userService.loading) {
-      userService.getUserData();
-      return const SafeArea(
-        child: Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(
-              color: Colors.purple,
-            ),
-          ),
-        ),
-      );
-    } else {
-      if (userService.sharedPreferences.getKeys().isEmpty) {
-        return _bscAddressUI(context);
-      }
-      return const BscWalletPage();
-    }
-  }
-
-  void _moveToUserNamePage(BuildContext context) {
-    Navigator.of(context).pushReplacementNamed(UserNamePage.routeID);
-  }
-
-  Widget _bscAddressUI(context) {
     return SafeArea(
       child: Scaffold(
         floatingActionButton: OutlinedButton(
           onPressed: () async {
-            if (!_formKey.currentState!.validate()) {
-              return;
-            }
-            SharedPreferences sharedPreferences =
+            SharedPreferences _sharedPreferences =
                 await SharedPreferences.getInstance();
-            sharedPreferences.setString(
-                'bsc_address', _bscAddressController.text);
+            _sharedPreferences.setString('user_name', _userNameController.text);
 
-            _moveToUserNamePage(context);
+            _moveToWalletPage(context);
           },
           child: const Text(
-            'NEXT',
+            'DONE',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
           style: OutlinedButton.styleFrom(
@@ -87,14 +54,21 @@ class BscAddressPage extends StatelessWidget {
                     width: MediaQuery.of(context).size.width * 0.40,
                   ),
                   const Text(
-                    'WELCOME TO META MAN!',
+                    'WELCOME TO',
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                     textScaleFactor: 1.5,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const Text(
-                    'Enter Your BSC Wallet Address to start tracking your holding',
+                    'META MAN!',
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    textScaleFactor: 1.5,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const Text(
+                    'Hey! What do we call you?',
                     textAlign: TextAlign.center,
                     textScaleFactor: 1.2,
                   ),
@@ -103,20 +77,9 @@ class BscAddressPage extends StatelessWidget {
                     child: Form(
                       key: _formKey,
                       child: TextFormField(
-                        controller: _bscAddressController,
-                        validator: (text) {
-                          if (text == null) {
-                            return 'Please Enter BSC address';
-                          } else if (text.length == 42) {
-                            return null;
-                          } else if (text.length > 42) {
-                            return 'Incorrect BSC address';
-                          } else if (text.length < 42) {
-                            return 'Incorrect BSC address';
-                          }
-                        },
+                        controller: _userNameController,
                         decoration: InputDecoration(
-                          hintText: 'Your BSC Address',
+                          hintText: 'Your Name',
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
@@ -135,5 +98,9 @@ class BscAddressPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _moveToWalletPage(BuildContext context) {
+    Navigator.of(context).pushReplacementNamed(BscWalletPage.routeID);
   }
 }

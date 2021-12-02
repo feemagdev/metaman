@@ -1,6 +1,7 @@
 import 'package:crypto_exchange/pages/bsc_address_page.dart';
 import 'package:crypto_exchange/route_generator.dart';
 import 'package:crypto_exchange/services/bsc_service.dart';
+import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,8 +15,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<BscService>(
-      create: (_) => BscService(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<BscService>(
+          create: (_) => BscService(),
+        ),
+        ChangeNotifierProvider<UserService>(
+          create: (_) => UserService(),
+        ),
+      ],
       child: MaterialApp(
         title: 'Crypto App',
         debugShowCheckedModeBanner: false,

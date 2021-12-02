@@ -1,5 +1,6 @@
 import 'package:crypto_exchange/pages/bottom_navigation_drawer.dart';
 import 'package:crypto_exchange/pages/bsc_address_page.dart';
+import 'package:crypto_exchange/pages/user_name_page.dart';
 import 'package:flutter/material.dart';
 
 class RouteGenerator {
@@ -11,6 +12,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const BscWalletPage());
       case BscAddressPage.routeID:
         return MaterialPageRoute(builder: (_) => BscAddressPage());
+      case UserNamePage.routeID:
+        return MaterialPageRoute(builder: (_) => UserNamePage());
       default:
         return _errorRoute();
     }
