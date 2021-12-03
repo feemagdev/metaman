@@ -1,9 +1,11 @@
 import 'dart:math';
 
+import 'package:crypto_exchange/models/high_low.dart';
 import 'package:crypto_exchange/services/bsc_service.dart';
 import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -18,12 +20,19 @@ class HomePage extends StatelessWidget {
       padding: const EdgeInsets.all(10.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _getName(userService),
-          const SizedBox(
-            height: 10.0,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _getName(userService),
+              const SizedBox(
+                height: 10.0,
+              ),
+              _getBalanceDetails(bsc, userService, size, context),
+            ],
           ),
-          _getBalanceDetails(bsc, userService, size, context),
+          _createChart(bsc.highLowData, bsc)
         ],
       ),
     );
@@ -167,6 +176,7 @@ class HomePage extends StatelessWidget {
     String? bscAddress = userService.sharedPreferences.getString('bsc_address');
     if (bsc.loading) {
       bsc.getUserBalance(bscAddress!);
+      bsc.getChartData('d');
       return const CircularProgressIndicator();
     } else {
       if (bsc.statusCode == '0') {
@@ -187,6 +197,56 @@ class HomePage extends StatelessWidget {
         bsc.priceChangeIn24h,
       );
     }
+  }
+
+  Widget _createChart(
+    List<HighLow> highLowData,
+    BscService bsc,
+  ) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TextButton(
+              onPressed: () {
+                bsc.getChartData('d');
+              },
+              child: const Text('DAY'),
+            ),
+            TextButton(
+              onPressed: () {
+                bsc.getChartData('w');
+              },
+              child: const Text('WEEK'),
+            ),
+            TextButton(
+              onPressed: () {
+                bsc.getChartData('m');
+              },
+              child: const Text('MONTH'),
+            ),
+            TextButton(
+              onPressed: () {
+                bsc.getChartData('y');
+              },
+              child: const Text('YEAR'),
+            ),
+          ],
+        ),
+        SfCartesianChart(
+          tooltipBehavior: TooltipBehavior(enable: true),
+          primaryXAxis: CategoryAxis(),
+          series: <ChartSeries>[
+            LineSeries<HighLow, String>(
+              dataSource: highLowData,
+              xValueMapper: (HighLow time, _) => time.time,
+              yValueMapper: (HighLow price, _) => price.price,
+            )
+          ],
+        ),
+      ],
+    );
   }
 
   double _conversion(result, double currentBnbPrice) {
