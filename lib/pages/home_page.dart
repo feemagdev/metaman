@@ -34,10 +34,14 @@ class HomePage extends StatelessWidget {
     if (name == null) {
       return const Text('');
     }
-    return Text(name);
+    return Text(
+      'Hi $name!',
+      textScaleFactor: 1.5,
+      style: const TextStyle(fontWeight: FontWeight.bold),
+    );
   }
 
-  Widget _balanceUI(Size size, double result) {
+  Widget _balanceUI(Size size, double result, double priceChangeIn24h) {
     return Container(
       width: size.width,
       height: 200,
@@ -110,17 +114,43 @@ class HomePage extends StatelessWidget {
                   width: 5.0,
                 ),
                 Container(
-                  width: 50.0,
+                  padding: const EdgeInsets.only(left: 5.0, right: 5.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(5.0),
                   ),
-                  child: const Center(
-                    child: Text(
-                      '0.0%',
-                      textScaleFactor: 1.3,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.green),
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        priceChangeIn24h.isNegative
+                            ? const Icon(
+                                Icons.arrow_downward_outlined,
+                                color: Colors.red,
+                              )
+                            : const Icon(
+                                Icons.arrow_upward_outlined,
+                                color: Colors.green,
+                              ),
+                        Text(
+                          priceChangeIn24h.abs().toStringAsFixed(1),
+                          textScaleFactor: 1.3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: priceChangeIn24h.isNegative
+                                  ? Colors.red
+                                  : Colors.green),
+                        ),
+                        Text(
+                          '%',
+                          textScaleFactor: 1.3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: priceChangeIn24h.isNegative
+                                  ? Colors.red
+                                  : Colors.green),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -149,16 +179,18 @@ class HomePage extends StatelessWidget {
         );
       }
       double result = double.parse(bsc.result);
-      result = _conversion(result);
+      result = _conversion(result, bsc.currentBnbPrice);
+
       return _balanceUI(
         size,
         result,
+        bsc.priceChangeIn24h,
       );
     }
   }
 
-  double _conversion(result) {
+  double _conversion(result, double currentBnbPrice) {
     double rs = result / pow(10, 18);
-    return rs;
+    return rs * currentBnbPrice;
   }
 }

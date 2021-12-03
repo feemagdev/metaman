@@ -32,14 +32,14 @@ class UserNamePage extends StatelessWidget {
         ),
         body: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              tileMode: TileMode.repeated,
+            gradient: RadialGradient(
+              center: Alignment.center,
+              radius: 2.0,
               colors: [
-                Colors.white.withOpacity(0.5),
                 Colors.purple.withOpacity(0.2),
-                Colors.white.withOpacity(0.5)
+                Colors.white.withOpacity(0.1),
+                Colors.white.withOpacity(0.1),
+                Colors.white.withOpacity(0.1),
               ],
             ),
           ),
