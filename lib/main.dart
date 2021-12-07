@@ -1,6 +1,7 @@
 import 'package:crypto_exchange/pages/bsc_address_page.dart';
 import 'package:crypto_exchange/route_generator.dart';
 import 'package:crypto_exchange/services/bsc_service.dart';
+import 'package:crypto_exchange/services/token_service.dart';
 import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,12 +24,14 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<UserService>(
           create: (_) => UserService(),
         ),
+        ChangeNotifierProvider<TokenService>(
+          create: (_) => TokenService(),
+        ),
       ],
       child: MaterialApp(
-        title: 'Crypto App',
-        debugShowCheckedModeBanner: false,
+        title: 'MetaMan',
         theme: ThemeData(
-          primarySwatch: Colors.purple,
+          primarySwatch: Colors.blue,
           fontFamily: 'Montserrat',
         ),
         onGenerateRoute: RouteGenerator.generateRoute,

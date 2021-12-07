@@ -5,9 +5,22 @@ class FeedBackPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: Text('This is FeedBack Page'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text(
+              'METAMAN BRIDGE',
+              textScaleFactor: 2.0,
+            ),
+            Text(
+              'Coming Soon',
+              textScaleFactor: 1.0,
+            ),
+          ],
+        ),
       ),
     );
   }

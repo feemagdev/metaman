@@ -2,7 +2,10 @@ import 'package:crypto_exchange/pages/feedback_page.dart';
 import 'package:crypto_exchange/pages/home_page.dart';
 import 'package:crypto_exchange/pages/poll_page.dart';
 import 'package:crypto_exchange/pages/setting_page.dart';
+import 'package:crypto_exchange/services/token_service.dart';
+import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class BscWalletPage extends StatefulWidget {
   static const String routeID = 'bsc_wallet_page';
@@ -17,6 +20,9 @@ class _BscWalletPageState extends State<BscWalletPage> {
 
   @override
   Widget build(BuildContext context) {
+    final tokenService = Provider.of<TokenService>(context);
+    final userService = Provider.of<UserService>(context);
+
     List<Widget> _widgetOptions = <Widget>[
       const HomePage(),
       const FeedBackPage(),
@@ -25,36 +31,47 @@ class _BscWalletPageState extends State<BscWalletPage> {
     ];
     return SafeArea(
       child: Scaffold(
-        bottomNavigationBar: _bottomNavigationBar(),
+        bottomNavigationBar: _bottomNavigationBar(tokenService, userService),
         body: _widgetOptions.elementAt(_selectedIndex),
       ),
     );
   }
 
-  Widget _bottomNavigationBar() {
+  Widget _bottomNavigationBar(
+      TokenService tokenService, UserService userService) {
     return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
+      items: <BottomNavigationBarItem>[
+        const BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           label: '',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.feed_outlined),
           label: '',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.bar_chart_outlined),
+          icon: Image.asset(
+            'assets/images/trade.png',
+            width: 24.0,
+          ),
           label: '',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           label: '',
         ),
       ],
       currentIndex: _selectedIndex,
-      selectedItemColor: Colors.purple[800],
+      selectedItemColor: Colors.blue[800],
       unselectedItemColor: Colors.black,
-      onTap: _onItemTapped,
+      onTap: (int index) {
+        if (index == 0) {
+          tokenService.tokenLoading = true;
+        }
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
       landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
       selectedLabelStyle: const TextStyle(
         color: Colors.purple,
@@ -62,11 +79,5 @@ class _BscWalletPageState extends State<BscWalletPage> {
       ),
       elevation: 10.0,
     );
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 }

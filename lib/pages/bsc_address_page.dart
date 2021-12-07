@@ -50,6 +50,8 @@ class BscAddressPage extends StatelessWidget {
                 await SharedPreferences.getInstance();
             sharedPreferences.setString(
                 'bsc_address', _bscAddressController.text);
+            sharedPreferences.setString('currency', 'USD');
+            sharedPreferences.setString('currency_symbol', '\$');
 
             _moveToUserNamePage(context);
           },
@@ -69,7 +71,7 @@ class BscAddressPage extends StatelessWidget {
               center: Alignment.center,
               radius: 2.0,
               colors: [
-                Colors.purple.withOpacity(0.2),
+                Colors.blue.withOpacity(0.2),
                 Colors.white.withOpacity(0.1),
                 Colors.white.withOpacity(0.1),
                 Colors.white.withOpacity(0.1),
@@ -87,7 +89,7 @@ class BscAddressPage extends StatelessWidget {
                     width: MediaQuery.of(context).size.width * 0.40,
                   ),
                   const Text(
-                    'WELCOME TO META MAN!',
+                    'WELCOME TO METAMAN!',
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                     textScaleFactor: 1.5,

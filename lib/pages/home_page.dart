@@ -1,11 +1,11 @@
 import 'dart:math';
 
-import 'package:crypto_exchange/models/high_low.dart';
-import 'package:crypto_exchange/services/bsc_service.dart';
+import 'package:crypto_exchange/models/tokens.dart';
+import 'package:crypto_exchange/services/token_service.dart';
 import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -13,26 +13,25 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    final bsc = Provider.of<BscService>(context);
     final userService = Provider.of<UserService>(context);
+    final tokenService = Provider.of<TokenService>(context);
 
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _getName(userService),
-              const SizedBox(
-                height: 10.0,
-              ),
-              _getBalanceDetails(bsc, userService, size, context),
-            ],
+          _getName(userService),
+          const SizedBox(
+            height: 10.0,
           ),
-          _createChart(bsc.highLowData, bsc)
+          _getBalanceDetails(tokenService, userService, size, context),
+          const SizedBox(
+            height: 10.0,
+          ),
+          tokenService.tokenLoading ? const Text('') : const Text('Tokens'),
+          _getTokens(tokenService)
         ],
       ),
     );
@@ -50,12 +49,13 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _balanceUI(Size size, double result, double priceChangeIn24h) {
+  Widget _balanceUI(Size size, double result, double priceChangeIn24h,
+      String currency, String currencyCode) {
     return Container(
       width: size.width,
       height: 200,
       decoration: BoxDecoration(
-        color: Colors.black,
+        color: Colors.blue,
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Padding(
@@ -76,11 +76,11 @@ class HomePage extends StatelessWidget {
             const SizedBox(
               height: 15.0,
             ),
-            const Text(
-              'Total USD Value',
+            Text(
+              'Total $currency Value',
               overflow: TextOverflow.ellipsis,
               textScaleFactor: 1.3,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
               ),
             ),
@@ -88,11 +88,12 @@ class HomePage extends StatelessWidget {
               height: 10.0,
             ),
             Text(
-              result.toStringAsFixed(3),
+              '$currencyCode ${NumberFormat.decimalPattern().format(result)}',
               overflow: TextOverflow.ellipsis,
-              textScaleFactor: 1.3,
+              textScaleFactor: 1.5,
               style: const TextStyle(
                 color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(
@@ -132,17 +133,8 @@ class HomePage extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        priceChangeIn24h.isNegative
-                            ? const Icon(
-                                Icons.arrow_downward_outlined,
-                                color: Colors.red,
-                              )
-                            : const Icon(
-                                Icons.arrow_upward_outlined,
-                                color: Colors.green,
-                              ),
                         Text(
-                          priceChangeIn24h.abs().toStringAsFixed(1),
+                          priceChangeIn24h.toStringAsFixed(1),
                           textScaleFactor: 1.3,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -159,6 +151,15 @@ class HomePage extends StatelessWidget {
                                   ? Colors.red
                                   : Colors.green),
                         ),
+                        priceChangeIn24h.isNegative
+                            ? const Icon(
+                                Icons.arrow_downward_outlined,
+                                color: Colors.red,
+                              )
+                            : const Icon(
+                                Icons.arrow_upward_outlined,
+                                color: Colors.green,
+                              ),
                       ],
                     ),
                   ),
@@ -172,85 +173,289 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _getBalanceDetails(
-      BscService bsc, UserService userService, Size size, context) {
+      TokenService bsc, UserService userService, Size size, context) {
     String? bscAddress = userService.sharedPreferences.getString('bsc_address');
-    if (bsc.loading) {
-      bsc.getUserBalance(bscAddress!);
-      bsc.getChartData('d');
-      return const CircularProgressIndicator();
-    } else {
-      if (bsc.statusCode == '0') {
-        return Center(
-          child: Text(bsc.message),
-        );
-      } else if (bsc.message.contains('Invalid API Key')) {
-        return const Center(
-          child: Text('Internal Error'),
-        );
-      }
-      double result = double.parse(bsc.result);
-      result = _conversion(result, bsc.currentBnbPrice);
 
+    if (bsc.tokenLoading) {
+      bsc.getTokens(bscAddress!);
+      return const Text('');
+    } else {
       return _balanceUI(
-        size,
-        result,
-        bsc.priceChangeIn24h,
+          size,
+          bsc.totaCurrenctlValue,
+          bsc.change24hPercent,
+          userService.sharedPreferences.getString('currency')!,
+          userService.sharedPreferences.getString('currency_symbol')!);
+    }
+  }
+
+  // Widget _createChart(
+  //   List<HighLow> highLowData,
+  //   BscService bsc,
+  // ) {
+  //   return Column(
+  //     children: [
+  //       Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //         children: [
+  //           TextButton(
+  //             onPressed: () {
+  //               bsc.getChartData('d');
+  //             },
+  //             child: const Text('DAY'),
+  //             style: TextButton.styleFrom(),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               bsc.getChartData('w');
+  //             },
+  //             child: const Text('WEEK'),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               bsc.getChartData('m');
+  //             },
+  //             child: const Text('MONTH'),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               bsc.getChartData('y');
+  //             },
+  //             child: const Text('YEAR'),
+  //           ),
+  //         ],
+  //       ),
+  //       SfCartesianChart(
+  //         tooltipBehavior: TooltipBehavior(enable: true),
+  //         primaryXAxis:
+  //             CategoryAxis(edgeLabelPlacement: EdgeLabelPlacement.shift),
+  //         series: <ChartSeries>[
+  //           LineSeries<HighLow, String>(
+  //             dataSource: highLowData,
+  //             color: Colors.blue,
+  //             xValueMapper: (HighLow time, _) => time.time,
+  //             yValueMapper: (HighLow price, _) => price.price,
+  //           )
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  Widget _getTokens(TokenService tokenService) {
+    if (tokenService.tokenLoading) {
+      return const LinearProgressIndicator();
+    } else {
+      return Expanded(
+        child: ListView.separated(
+          itemCount: tokenService.tokens.length,
+          itemBuilder: (context, index) {
+            Token token = tokenService.tokens[index];
+            return InkWell(
+              onTap: () {
+                _showModal(context, token);
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // right part
+                    Row(
+                      children: [
+                        Image.network(
+                          token.logoUrl,
+                          width: 30.0,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/logo.png',
+                              width: 30.0,
+                            );
+                          },
+                        ),
+                        const SizedBox(
+                          width: 10.0,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              token.contractName,
+                              textScaleFactor: 1.2,
+                            ),
+                            Text(
+                              token.contractTickerSymbol,
+                              style: TextStyle(color: Colors.grey[500]),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                    //left part
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          NumberFormat.currency(symbol: '\$')
+                              .format(token.quote),
+                        ),
+                        Text(
+                          NumberFormat.compact(locale: 'en_US').format(
+                              (double.parse(token.balance) /
+                                  pow(10, token.contractDecimals))),
+                          style: TextStyle(color: Colors.grey[500]),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            );
+            // ListTile(
+            //   leading: Image.network(
+            //     token.logoUrl,
+            //     width: 30.0,
+            //     errorBuilder: (context, error, stackTrace) {
+            //       return Image.asset(
+            //         'assets/images/logo.png',
+            //         width: 10.0,
+            //       );
+            //     },
+            //   ),
+            //   title: Text(token.contractName),
+            //   subtitle: Text(token.contractTickerSymbol),
+            //   trailing: Column(
+            //     children: [
+            //       Text(token.quote.toStringAsFixed(2)),
+            //       const Text('data')
+            //     ],
+            //   ),
+            // );
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return const Divider(
+              color: Colors.black38,
+            );
+          },
+        ),
       );
     }
   }
 
-  Widget _createChart(
-    List<HighLow> highLowData,
-    BscService bsc,
-  ) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(
-              onPressed: () {
-                bsc.getChartData('d');
-              },
-              child: const Text('DAY'),
-            ),
-            TextButton(
-              onPressed: () {
-                bsc.getChartData('w');
-              },
-              child: const Text('WEEK'),
-            ),
-            TextButton(
-              onPressed: () {
-                bsc.getChartData('m');
-              },
-              child: const Text('MONTH'),
-            ),
-            TextButton(
-              onPressed: () {
-                bsc.getChartData('y');
-              },
-              child: const Text('YEAR'),
-            ),
-          ],
-        ),
-        SfCartesianChart(
-          tooltipBehavior: TooltipBehavior(enable: true),
-          primaryXAxis: CategoryAxis(),
-          series: <ChartSeries>[
-            LineSeries<HighLow, String>(
-              dataSource: highLowData,
-              xValueMapper: (HighLow time, _) => time.time,
-              yValueMapper: (HighLow price, _) => price.price,
-            )
-          ],
-        ),
-      ],
+  void _showModal(BuildContext context, Token token) {
+    final userService = Provider.of<UserService>(context, listen: false);
+    String currecny = userService.sharedPreferences.getString('currency')!;
+    String currecnySymbol =
+        userService.sharedPreferences.getString('currency_symbol')!;
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            children: [
+              // coin icon name and close button icon
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // right part
+                  Row(
+                    children: [
+                      Image.network(
+                        token.logoUrl,
+                        width: 30.0,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            'assets/images/logo.png',
+                            width: 30.0,
+                          );
+                        },
+                      ),
+                      const SizedBox(
+                        width: 10.0,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            token.contractName,
+                            textScaleFactor: 1.2,
+                          ),
+                          Text(
+                            token.contractTickerSymbol,
+                            style: TextStyle(color: Colors.grey[500]),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                  // CLOSE BUTTON
+                  SizedBox(
+                    width: 50.0,
+                    height: 50.0,
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const CircleAvatar(
+                        radius: 30.0,
+                        backgroundColor: Colors.black,
+                        child: Icon(
+                          Icons.close,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('price'),
+                  Text('$currecnySymbol${token.quoteRate.toStringAsFixed(2)}'),
+                ],
+              ),
+              const Divider(
+                color: Colors.black38,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Total ${token.contractTickerSymbol}'),
+                  Text((double.parse(token.balance) /
+                          pow(10, token.contractDecimals))
+                      .toStringAsFixed(2)),
+                ],
+              ),
+              const Divider(
+                color: Colors.black38,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Total $currecny value'),
+                  Text('$currecnySymbol${token.quote.toStringAsFixed(2)}'),
+                ],
+              ),
+              const Divider(
+                color: Colors.black38,
+              ),
+              FutureBuilder(
+                builder: (context, AsyncSnapshot snapshot) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total $currecny value'),
+                      Text('$currecnySymbol${token.quote.toStringAsFixed(2)}'),
+                    ],
+                  );
+                },
+              )
+            ],
+          ),
+        );
+      },
     );
-  }
-
-  double _conversion(result, double currentBnbPrice) {
-    double rs = result / pow(10, 18);
-    return rs * currentBnbPrice;
   }
 }

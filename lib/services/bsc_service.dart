@@ -14,8 +14,6 @@ class BscService with ChangeNotifier {
   String errorMessage = '';
   String statusCode = '';
   double currentBnbPrice = 0.0;
-  double high24h = 0.0;
-  double low24h = 0.0;
   double priceChangeIn24h = 0.0;
   bool chartLoading = true;
   List<HighLow> highLowData = [];
@@ -32,13 +30,13 @@ class BscService with ChangeNotifier {
     sharedPreferences.setString('status', statusCode);
     sharedPreferences.setString('message', message);
     sharedPreferences.setString('result', result);
-    const bnbDetailsUrl =
-        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=binancecoin&order=market_cap_desc&per_page=100&page=1&sparkline=false';
+    String currency = sharedPreferences.getString('currency')!;
+    final bnbDetailsUrl =
+        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=$currency&ids=binancecoin&order=market_cap_desc&per_page=100&page=1&sparkline=false';
     final responseBnbDetails = await http.get(Uri.parse(bnbDetailsUrl));
     final dataBnb = jsonDecode(responseBnbDetails.body);
-    currentBnbPrice = dataBnb[0]['current_price'];
-    high24h = dataBnb[0]['high_24h'];
-    low24h = dataBnb[0]['low_24h'];
+
+    currentBnbPrice = dataBnb[0]['current_price'].toDouble();
     priceChangeIn24h = dataBnb[0]['price_change_percentage_24h'];
 
     notifyListeners();
@@ -47,8 +45,6 @@ class BscService with ChangeNotifier {
   getChartData(String option) async {
     DateTime currentDateTime = DateTime.now();
     DateTime endTime = DateTime.now();
-    int skip = 0;
-    print('run');
     switch (option) {
       case 'd':
         endTime = currentDateTime.subtract(
@@ -73,12 +69,13 @@ class BscService with ChangeNotifier {
     }
     int unixStartTime = currentDateTime.millisecondsSinceEpoch ~/ 1000;
     int unixEndTime = endTime.millisecondsSinceEpoch ~/ 1000;
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String currency = sharedPreferences.getString('currency')!;
     final chartApiUrl =
-        'https://api.coingecko.com/api/v3/coins/binancecoin/market_chart/range?vs_currency=usd&from=$unixEndTime&to=$unixStartTime';
+        'https://api.coingecko.com/api/v3/coins/binancecoin/market_chart/range?vs_currency=$currency&from=$unixEndTime&to=$unixStartTime';
     final chartApiResponse = await http.get(Uri.parse(chartApiUrl));
     Map<String, dynamic> chartData = jsonDecode(chartApiResponse.body);
     var pricesAndTimeList = chartData['prices'] as List;
-    print(pricesAndTimeList.length);
     highLowData = [];
     for (var element in pricesAndTimeList) {
       DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(element[0]);

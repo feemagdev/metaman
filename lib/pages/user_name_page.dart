@@ -1,6 +1,8 @@
 import 'package:crypto_exchange/pages/bottom_navigation_drawer.dart';
+import 'package:crypto_exchange/services/token_service.dart';
+import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class UserNamePage extends StatelessWidget {
   static const String routeID = 'username_page';
@@ -10,15 +12,19 @@ class UserNamePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokenService = Provider.of<TokenService>(context);
+    final userService = Provider.of<UserService>(context);
     return SafeArea(
       child: Scaffold(
         floatingActionButton: OutlinedButton(
           onPressed: () async {
-            SharedPreferences _sharedPreferences =
-                await SharedPreferences.getInstance();
-            _sharedPreferences.setString('user_name', _userNameController.text);
+            userService.sharedPreferences
+                .setString('user_name', _userNameController.text);
+            tokenService.tokenLoading = true;
 
-            _moveToWalletPage(context);
+            _moveToWalletPage(
+              context,
+            );
           },
           child: const Text(
             'DONE',
@@ -36,7 +42,7 @@ class UserNamePage extends StatelessWidget {
               center: Alignment.center,
               radius: 2.0,
               colors: [
-                Colors.purple.withOpacity(0.2),
+                Colors.blue.withOpacity(0.2),
                 Colors.white.withOpacity(0.1),
                 Colors.white.withOpacity(0.1),
                 Colors.white.withOpacity(0.1),
@@ -61,7 +67,7 @@ class UserNamePage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const Text(
-                    'META MAN!',
+                    'METAMAN!',
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                     textScaleFactor: 1.5,
