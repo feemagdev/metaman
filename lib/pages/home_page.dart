@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:crypto_exchange/models/token_market_model.dart';
 import 'package:crypto_exchange/models/tokens.dart';
 import 'package:crypto_exchange/services/token_service.dart';
 import 'package:crypto_exchange/services/user_service.dart';
@@ -31,7 +32,8 @@ class HomePage extends StatelessWidget {
             height: 10.0,
           ),
           tokenService.tokenLoading ? const Text('') : const Text('Tokens'),
-          _getTokens(tokenService)
+          _getTokens(tokenService,
+              userService.sharedPreferences.getString('currency_symbol'))
         ],
       ),
     );
@@ -173,17 +175,17 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _getBalanceDetails(
-      TokenService bsc, UserService userService, Size size, context) {
+      TokenService tokenService, UserService userService, Size size, context) {
     String? bscAddress = userService.sharedPreferences.getString('bsc_address');
 
-    if (bsc.tokenLoading) {
-      bsc.getTokens(bscAddress!);
+    if (tokenService.tokenLoading) {
+      tokenService.getTokens(bscAddress!);
       return const Text('');
     } else {
       return _balanceUI(
           size,
-          bsc.totaCurrenctlValue,
-          bsc.change24hPercent,
+          tokenService.totaCurrenctlValue,
+          tokenService.change24hPercent,
           userService.sharedPreferences.getString('currency')!,
           userService.sharedPreferences.getString('currency_symbol')!);
     }
@@ -242,7 +244,7 @@ class HomePage extends StatelessWidget {
   //   );
   // }
 
-  Widget _getTokens(TokenService tokenService) {
+  Widget _getTokens(TokenService tokenService, String? currencyCode) {
     if (tokenService.tokenLoading) {
       return const LinearProgressIndicator();
     } else {
@@ -253,7 +255,9 @@ class HomePage extends StatelessWidget {
             Token token = tokenService.tokens[index];
             return InkWell(
               onTap: () {
-                _showModal(context, token);
+                tokenService.getTokenChangePercent(
+                    '1D', tokenService.tokenMarketData[index]);
+                _showModal(context, token, tokenService.tokenMarketData[index]);
               },
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -296,8 +300,7 @@ class HomePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          NumberFormat.currency(symbol: '\$')
-                              .format(token.quote),
+                          '$currencyCode ${(tokenService.tokenMarketData[index].currentPrice * (double.parse(token.balance) / pow(10, token.contractDecimals))).toStringAsFixed(2)}',
                         ),
                         Text(
                           NumberFormat.compact(locale: 'en_US').format(
@@ -342,119 +345,163 @@ class HomePage extends StatelessWidget {
     }
   }
 
-  void _showModal(BuildContext context, Token token) {
+  void _showModal(
+      BuildContext context, Token token, TokenMarketModel tokenMarketData) {
     final userService = Provider.of<UserService>(context, listen: false);
+    final tokenService = Provider.of<TokenService>(context, listen: false);
     String currecny = userService.sharedPreferences.getString('currency')!;
     String currecnySymbol =
         userService.sharedPreferences.getString('currency_symbol')!;
+
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            children: [
-              // coin icon name and close button icon
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // right part
-                  Row(
-                    children: [
-                      Image.network(
-                        token.logoUrl,
-                        width: 30.0,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.asset(
-                            'assets/images/logo.png',
-                            width: 30.0,
-                          );
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+          return Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                // coin icon name and close button icon
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // right part
+                    Row(
+                      children: [
+                        Image.network(
+                          token.logoUrl,
+                          width: 30.0,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/logo.png',
+                              width: 30.0,
+                            );
+                          },
+                        ),
+                        const SizedBox(
+                          width: 10.0,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              token.contractName,
+                              textScaleFactor: 1.2,
+                            ),
+                            Text(
+                              token.contractTickerSymbol,
+                              style: TextStyle(color: Colors.grey[500]),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                    // CLOSE BUTTON
+                    SizedBox(
+                      width: 50.0,
+                      height: 50.0,
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
                         },
-                      ),
-                      const SizedBox(
-                        width: 10.0,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            token.contractName,
-                            textScaleFactor: 1.2,
+                        icon: const CircleAvatar(
+                          radius: 30.0,
+                          backgroundColor: Colors.black,
+                          child: Icon(
+                            Icons.close,
+                            color: Colors.white,
                           ),
-                          Text(
-                            token.contractTickerSymbol,
-                            style: TextStyle(color: Colors.grey[500]),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                  // CLOSE BUTTON
-                  SizedBox(
-                    width: 50.0,
-                    height: 50.0,
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const CircleAvatar(
-                        radius: 30.0,
-                        backgroundColor: Colors.black,
-                        child: Icon(
-                          Icons.close,
-                          color: Colors.white,
                         ),
                       ),
+                    )
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('price'),
+                    Text(
+                        '$currecnySymbol${token.quoteRate.toStringAsFixed(2)}'),
+                  ],
+                ),
+                const Divider(
+                  color: Colors.black38,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Total ${token.contractTickerSymbol}'),
+                    Text((double.parse(token.balance) /
+                            pow(10, token.contractDecimals))
+                        .toStringAsFixed(2)),
+                  ],
+                ),
+                const Divider(
+                  color: Colors.black38,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Total $currecny value'),
+                    Text(
+                        '$currecnySymbol${(tokenMarketData.currentPrice * (double.parse(token.balance) / pow(10, token.contractDecimals))).toStringAsFixed(2)}'),
+                  ],
+                ),
+                const Divider(
+                  color: Colors.black38,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Market Cap'),
+                    Text(
+                      '$currecnySymbol ${NumberFormat.decimalPattern().format(tokenMarketData.marketCap)}',
                     ),
-                  )
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('price'),
-                  Text('$currecnySymbol${token.quoteRate.toStringAsFixed(2)}'),
-                ],
-              ),
-              const Divider(
-                color: Colors.black38,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Total ${token.contractTickerSymbol}'),
-                  Text((double.parse(token.balance) /
-                          pow(10, token.contractDecimals))
-                      .toStringAsFixed(2)),
-                ],
-              ),
-              const Divider(
-                color: Colors.black38,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Total $currecny value'),
-                  Text('$currecnySymbol${token.quote.toStringAsFixed(2)}'),
-                ],
-              ),
-              const Divider(
-                color: Colors.black38,
-              ),
-              FutureBuilder(
-                builder: (context, AsyncSnapshot snapshot) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Total $currecny value'),
-                      Text('$currecnySymbol${token.quote.toStringAsFixed(2)}'),
-                    ],
-                  );
-                },
-              )
-            ],
-          ),
-        );
+                  ],
+                ),
+                const Divider(
+                  color: Colors.black38,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Text('% Change'),
+                        TextButton(
+                          onPressed: () {
+                            tokenService.getTokenChangePercent(
+                                '1D', tokenMarketData);
+                            setState(() {});
+                          },
+                          child: const Text('1D'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            tokenService.getTokenChangePercent(
+                                '1W', tokenMarketData);
+                            setState(() {});
+                          },
+                          child: const Text('1W'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            tokenService.getTokenChangePercent(
+                                '1M', tokenMarketData);
+                            setState(() {});
+                          },
+                          child: const Text('1M'),
+                        ),
+                      ],
+                    ),
+                    Text(tokenService.selectedPerecet.toStringAsFixed(2)),
+                  ],
+                ),
+              ],
+            ),
+          );
+        });
       },
     );
   }

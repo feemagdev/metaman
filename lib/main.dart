@@ -1,6 +1,5 @@
 import 'package:crypto_exchange/pages/bsc_address_page.dart';
 import 'package:crypto_exchange/route_generator.dart';
-import 'package:crypto_exchange/services/bsc_service.dart';
 import 'package:crypto_exchange/services/token_service.dart';
 import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +17,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<BscService>(
-          create: (_) => BscService(),
-        ),
         ChangeNotifierProvider<UserService>(
           create: (_) => UserService(),
         ),
