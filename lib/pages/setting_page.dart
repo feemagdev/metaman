@@ -1,5 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:crypto_exchange/pages/bsc_address_page.dart';
+import 'package:crypto_exchange/pages/token_visibility_page.dart';
 import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -62,10 +63,9 @@ class SettingPage extends StatelessWidget {
                           showCurrencyName: true,
                           showCurrencyCode: true,
                           onSelect: (Currency currency) {
-                            userService.sharedPreferences
-                                .setString('currency', currency.code);
-                            userService.sharedPreferences
-                                .setString('currency_symbol', currency.symbol);
+                            userService.changeCurrency(
+                                currency: currency.code,
+                                currencySymbol: currency.symbol);
                           },
                         );
                       },
@@ -114,7 +114,9 @@ class SettingPage extends StatelessWidget {
                       color: Colors.black.withOpacity(0.2),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.pushNamed(context, TokenVisibility.routeID);
+                      },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

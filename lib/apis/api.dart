@@ -1,3 +1,3 @@
 class ApiKeys {
-  static const tokenApi = String.fromEnvironment('toekn_api');
+  static const tokenApi = String.fromEnvironment('token_api');
 }

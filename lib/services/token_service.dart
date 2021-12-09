@@ -60,10 +60,21 @@ class TokenService with ChangeNotifier {
       List<dynamic> tokenDetailsList = jsonDecode(tokenDetails.body);
       TokenMarketModel marketModel =
           TokenMarketModel.from(tokenDetailsList.first);
-      totaCurrenctlValue += double.parse(tokens[i].balance) /
-          pow(10, tokens[i].contractDecimals) *
-          marketModel.currentPrice;
+      if (sharedPreferences.containsKey(marketModel.symbol)) {
+        if (sharedPreferences.getBool(marketModel.symbol)!) {
+          totaCurrenctlValue += double.parse(tokens[i].balance) /
+              pow(10, tokens[i].contractDecimals) *
+              marketModel.currentPrice;
+        }
+      } else {
+        sharedPreferences.setBool(marketModel.symbol, true);
+        totaCurrenctlValue += double.parse(tokens[i].balance) /
+            pow(10, tokens[i].contractDecimals) *
+            marketModel.currentPrice;
+      }
+
       tokenMarketData.add(marketModel);
+
       i++;
     });
     notifyListeners();
@@ -103,7 +114,7 @@ class TokenService with ChangeNotifier {
     return tokenID;
   }
 
-  getTokenChangePercent(String s, TokenMarketModel tokenMarketModel) {
+  void getTokenChangePercent(String s, TokenMarketModel tokenMarketModel) {
     switch (s) {
       case '1D':
         selectedPerecet = tokenMarketModel.priceChange24h;

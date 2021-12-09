@@ -32,8 +32,10 @@ class HomePage extends StatelessWidget {
             height: 10.0,
           ),
           tokenService.tokenLoading ? const Text('') : const Text('Tokens'),
-          _getTokens(tokenService,
-              userService.sharedPreferences.getString('currency_symbol'))
+          _getTokens(
+              tokenService,
+              userService.sharedPreferences.getString('currency_symbol'),
+              userService)
         ],
       ),
     );
@@ -244,100 +246,86 @@ class HomePage extends StatelessWidget {
   //   );
   // }
 
-  Widget _getTokens(TokenService tokenService, String? currencyCode) {
+  Widget _getTokens(TokenService tokenService, String? currencyCode,
+      UserService userService) {
     if (tokenService.tokenLoading) {
       return const LinearProgressIndicator();
     } else {
       return Expanded(
-        child: ListView.separated(
+        child: ListView.builder(
           itemCount: tokenService.tokens.length,
           itemBuilder: (context, index) {
             Token token = tokenService.tokens[index];
-            return InkWell(
-              onTap: () {
-                tokenService.getTokenChangePercent(
-                    '1D', tokenService.tokenMarketData[index]);
-                _showModal(context, token, tokenService.tokenMarketData[index]);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // right part
-                    Row(
+            TokenMarketModel marketModel = tokenService.tokenMarketData[index];
+            if (!userService.sharedPreferences.getBool(marketModel.symbol)!) {
+              return const SizedBox();
+            }
+            return Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    tokenService.getTokenChangePercent('1D', marketModel);
+                    _showModal(context, token, marketModel);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Image.network(
-                          token.logoUrl,
-                          width: 30.0,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              'assets/images/logo.png',
+                        // right part
+                        Row(
+                          children: [
+                            Image.network(
+                              marketModel.image,
                               width: 30.0,
-                            );
-                          },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'assets/images/logo.png',
+                                  width: 30.0,
+                                );
+                              },
+                            ),
+                            const SizedBox(
+                              width: 10.0,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  token.contractName,
+                                  textScaleFactor: 1.2,
+                                ),
+                                Text(
+                                  token.contractTickerSymbol,
+                                  style: TextStyle(color: Colors.grey[500]),
+                                ),
+                              ],
+                            )
+                          ],
                         ),
-                        const SizedBox(
-                          width: 10.0,
-                        ),
+                        //left part
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              token.contractName,
-                              textScaleFactor: 1.2,
+                              '$currencyCode ${(tokenService.tokenMarketData[index].currentPrice * (double.parse(token.balance) / pow(10, token.contractDecimals))).toStringAsFixed(2)}',
                             ),
                             Text(
-                              token.contractTickerSymbol,
+                              NumberFormat.compact(locale: 'en_US').format(
+                                  (double.parse(token.balance) /
+                                      pow(10, token.contractDecimals))),
                               style: TextStyle(color: Colors.grey[500]),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
-                    //left part
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '$currencyCode ${(tokenService.tokenMarketData[index].currentPrice * (double.parse(token.balance) / pow(10, token.contractDecimals))).toStringAsFixed(2)}',
-                        ),
-                        Text(
-                          NumberFormat.compact(locale: 'en_US').format(
-                              (double.parse(token.balance) /
-                                  pow(10, token.contractDecimals))),
-                          style: TextStyle(color: Colors.grey[500]),
-                        ),
-                      ],
-                    )
-                  ],
+                  ),
                 ),
-              ),
-            );
-            // ListTile(
-            //   leading: Image.network(
-            //     token.logoUrl,
-            //     width: 30.0,
-            //     errorBuilder: (context, error, stackTrace) {
-            //       return Image.asset(
-            //         'assets/images/logo.png',
-            //         width: 10.0,
-            //       );
-            //     },
-            //   ),
-            //   title: Text(token.contractName),
-            //   subtitle: Text(token.contractTickerSymbol),
-            //   trailing: Column(
-            //     children: [
-            //       Text(token.quote.toStringAsFixed(2)),
-            //       const Text('data')
-            //     ],
-            //   ),
-            // );
-          },
-          separatorBuilder: (BuildContext context, int index) {
-            return const Divider(
-              color: Colors.black38,
+                const Divider(
+                  color: Colors.black38,
+                ),
+              ],
             );
           },
         ),
@@ -370,7 +358,7 @@ class HomePage extends StatelessWidget {
                     Row(
                       children: [
                         Image.network(
-                          token.logoUrl,
+                          tokenMarketData.image,
                           width: 30.0,
                           errorBuilder: (context, error, stackTrace) {
                             return Image.asset(
@@ -422,7 +410,7 @@ class HomePage extends StatelessWidget {
                   children: [
                     const Text('price'),
                     Text(
-                        '$currecnySymbol${token.quoteRate.toStringAsFixed(2)}'),
+                        '$currecnySymbol${tokenMarketData.currentPrice.toStringAsFixed(2)}'),
                   ],
                 ),
                 const Divider(

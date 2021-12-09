@@ -10,4 +10,11 @@ class UserService with ChangeNotifier {
     loading = false;
     notifyListeners();
   }
+
+  void changeCurrency(
+      {required String currency, required String currencySymbol}) {
+    sharedPreferences.setString('currency', currency);
+    sharedPreferences.setString('currency_symbol', currencySymbol);
+    notifyListeners();
+  }
 }

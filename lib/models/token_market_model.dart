@@ -4,6 +4,7 @@ class TokenMarketModel {
   final String id;
   final String symbol;
   final String name;
+  final String image;
   var currentPrice;
   var marketCap;
   var priceChange24h;
@@ -14,6 +15,7 @@ class TokenMarketModel {
       {required this.id,
       required this.symbol,
       required this.name,
+      required this.image,
       required this.marketCap,
       required this.priceChange24h,
       required this.priceChange30d,
@@ -30,6 +32,7 @@ class TokenMarketModel {
       priceChange30d: data['price_change_percentage_30d_in_currency'] ?? 0.0,
       priceChange7d: data['price_change_percentage_7d_in_currency'] ?? 0.0,
       currentPrice: data['current_price'] ?? 0.0,
+      image: data['image'] ?? '',
     );
   }
 }
