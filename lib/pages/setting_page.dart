@@ -188,7 +188,10 @@ class SettingPage extends StatelessWidget {
                 child: Column(
                   children: [
                     InkWell(
-                      onTap: () {},
+                      onTap: () async {
+                        const String _url = 'https://t.me/metamanappsupport';
+                        await _launchURL(context, _url);
+                      },
                       child: SizedBox(
                         height: 30.0,
                         child: Row(
@@ -211,7 +214,10 @@ class SettingPage extends StatelessWidget {
                       color: Colors.black.withOpacity(0.2),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () async {
+                        const String _url = 'https://www.metamancoin.com/';
+                        await _launchURL(context, _url);
+                      },
                       child: SizedBox(
                         height: 30.0,
                         child: Row(
@@ -245,7 +251,7 @@ class SettingPage extends StatelessWidget {
                     fontWeight: FontWeight.bold),
               ),
               const Text(
-                'the future of finance',
+                'hero of the metaverse',
                 textScaleFactor: 1.1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -254,7 +260,9 @@ class SettingPage extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () async {
-                  await _launchURL(context);
+                  const String _url =
+                      'https://poocoin.app/tokens/0x7e96790c9e36d4105e98ed4411e0a6c664ebd480';
+                  await _launchURL(context, _url);
                 },
                 child: Image.asset(
                   'assets/images/logo.png',
@@ -287,10 +295,8 @@ class SettingPage extends StatelessWidget {
     ).show();
   }
 
-  Future<void> _launchURL(context) async {
-    const String _url =
-        'https://poocoin.app/tokens/0x7e96790c9e36d4105e98ed4411e0a6c664ebd480';
-    if (!await launch(_url)) {
+  Future<void> _launchURL(context, url) async {
+    if (!await launch(url)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Could not launch website'),

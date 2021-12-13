@@ -5,6 +5,7 @@ import 'package:crypto_exchange/pages/setting_page.dart';
 import 'package:crypto_exchange/services/token_service.dart';
 import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 class BscWalletPage extends StatefulWidget {
@@ -40,30 +41,39 @@ class _BscWalletPageState extends State<BscWalletPage> {
   Widget _bottomNavigationBar(
       TokenService tokenService, UserService userService) {
     return BottomNavigationBar(
-      items: <BottomNavigationBarItem>[
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          label: '',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.feed_outlined),
-          label: '',
-        ),
+      items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/images/trade.png',
-            width: 24.0,
+          backgroundColor: Colors.white,
+          icon: FaIcon(
+            FontAwesomeIcons.home,
           ),
           label: '',
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
+        BottomNavigationBarItem(
+          backgroundColor: Colors.white,
+          icon: Icon(Icons.feed),
+          label: '',
+        ),
+        BottomNavigationBarItem(
+          backgroundColor: Colors.white,
+          icon: FaIcon(
+            FontAwesomeIcons.coins,
+          ),
+          label: '',
+        ),
+        BottomNavigationBarItem(
+          backgroundColor: Colors.white,
+          icon: Icon(Icons.person),
           label: '',
         ),
       ],
       currentIndex: _selectedIndex,
-      selectedItemColor: Colors.blue[800],
+      selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.black,
+      selectedFontSize: 12.0,
+      unselectedFontSize: 12.0,
+      backgroundColor: Colors.white,
+      type: BottomNavigationBarType.fixed,
       onTap: (int index) {
         if (index == 0) {
           tokenService.tokenLoading = true;
@@ -72,12 +82,7 @@ class _BscWalletPageState extends State<BscWalletPage> {
           _selectedIndex = index;
         });
       },
-      landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
-      selectedLabelStyle: const TextStyle(
-        color: Colors.purple,
-        fontWeight: FontWeight.bold,
-      ),
-      elevation: 10.0,
+      elevation: 5.0,
     );
   }
 }

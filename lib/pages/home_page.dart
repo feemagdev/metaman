@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:crypto_exchange/models/token_market_model.dart';
-import 'package:crypto_exchange/models/tokens.dart';
 import 'package:crypto_exchange/services/token_service.dart';
 import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
@@ -17,26 +16,39 @@ class HomePage extends StatelessWidget {
     final userService = Provider.of<UserService>(context);
     final tokenService = Provider.of<TokenService>(context);
 
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          _getName(userService),
-          const SizedBox(
-            height: 10.0,
-          ),
-          _getBalanceDetails(tokenService, userService, size, context),
-          const SizedBox(
-            height: 10.0,
-          ),
-          tokenService.tokenLoading ? const Text('') : const Text('Tokens'),
-          _getTokens(
-              tokenService,
-              userService.sharedPreferences.getString('currency_symbol'),
-              userService)
-        ],
+    return Container(
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 20.0, left: 20.0, top: 10.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            _getName(userService),
+            const SizedBox(
+              height: 10.0,
+            ),
+            _getBalanceDetails(tokenService, userService, size, context),
+            const SizedBox(
+              height: 10.0,
+            ),
+            tokenService.tokenLoading
+                ? const Text('')
+                : const Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Text(
+                      'Tokens',
+                    ),
+                  ),
+            const SizedBox(
+              height: 10.0,
+            ),
+            _getTokens(
+                tokenService,
+                userService.sharedPreferences.getString('currency_symbol'),
+                userService)
+          ],
+        ),
       ),
     );
   }
@@ -57,10 +69,10 @@ class HomePage extends StatelessWidget {
       String currency, String currencyCode) {
     return Container(
       width: size.width,
-      height: 200,
+      height: 150,
       decoration: BoxDecoration(
         color: Colors.blue,
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(15.0),
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -70,7 +82,7 @@ class HomePage extends StatelessWidget {
           children: [
             const Text(
               'Portfolio',
-              textScaleFactor: 1.5,
+              textScaleFactor: 1.1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -78,12 +90,12 @@ class HomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(
-              height: 15.0,
+              height: 10.0,
             ),
             Text(
               'Total $currency Value',
               overflow: TextOverflow.ellipsis,
-              textScaleFactor: 1.3,
+              textScaleFactor: 1.2,
               style: const TextStyle(
                 color: Colors.white,
               ),
@@ -94,14 +106,14 @@ class HomePage extends StatelessWidget {
             Text(
               '$currencyCode ${NumberFormat.decimalPattern().format(result)}',
               overflow: TextOverflow.ellipsis,
-              textScaleFactor: 1.5,
+              textScaleFactor: 1.3,
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(
-              height: 20.0,
+              height: 10.0,
             ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +121,7 @@ class HomePage extends StatelessWidget {
               children: [
                 const Text(
                   'change in 24h',
-                  textScaleFactor: 1.3,
+                  textScaleFactor: 0.9,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: Colors.white),
                 ),
@@ -119,7 +131,7 @@ class HomePage extends StatelessWidget {
                 const Text(
                   '|',
                   overflow: TextOverflow.ellipsis,
-                  textScaleFactor: 1.3,
+                  textScaleFactor: 0.9,
                   style: TextStyle(
                     color: Colors.white,
                   ),
@@ -128,10 +140,10 @@ class HomePage extends StatelessWidget {
                   width: 5.0,
                 ),
                 Container(
-                  padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+                  padding: const EdgeInsets.only(left: 3.0, right: 3.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(20.0),
                   ),
                   child: Center(
                     child: Row(
@@ -139,7 +151,7 @@ class HomePage extends StatelessWidget {
                       children: [
                         Text(
                           priceChangeIn24h.toStringAsFixed(1),
-                          textScaleFactor: 1.3,
+                          textScaleFactor: 0.9,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                               color: priceChangeIn24h.isNegative
@@ -148,7 +160,7 @@ class HomePage extends StatelessWidget {
                         ),
                         Text(
                           '%',
-                          textScaleFactor: 1.3,
+                          textScaleFactor: 0.9,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                               color: priceChangeIn24h.isNegative
@@ -159,10 +171,12 @@ class HomePage extends StatelessWidget {
                             ? const Icon(
                                 Icons.arrow_downward_outlined,
                                 color: Colors.red,
+                                size: 10.0,
                               )
                             : const Icon(
                                 Icons.arrow_upward_outlined,
                                 color: Colors.green,
+                                size: 10.0,
                               ),
                       ],
                     ),
@@ -249,14 +263,38 @@ class HomePage extends StatelessWidget {
   Widget _getTokens(TokenService tokenService, String? currencyCode,
       UserService userService) {
     if (tokenService.tokenLoading) {
-      return const LinearProgressIndicator();
+      return Center(
+        child: Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(10.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(50.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 2,
+                offset: const Offset(0, 0), // changes position of shadow
+              ),
+            ],
+          ),
+          child: const CircularProgressIndicator(
+            strokeWidth: 3.0,
+          ),
+        ),
+      );
     } else {
       return Expanded(
         child: ListView.builder(
-          itemCount: tokenService.tokens.length,
+          itemCount: tokenService.tokenMarketData.length,
           itemBuilder: (context, index) {
-            Token token = tokenService.tokens[index];
             TokenMarketModel marketModel = tokenService.tokenMarketData[index];
+            double totalValue =
+                (tokenService.tokenMarketData[index].currentPrice *
+                    (double.parse(marketModel.balance) /
+                        pow(10, marketModel.contractDecimals)));
             if (!userService.sharedPreferences.getBool(marketModel.symbol)!) {
               return const SizedBox();
             }
@@ -265,10 +303,11 @@ class HomePage extends StatelessWidget {
                 InkWell(
                   onTap: () {
                     tokenService.getTokenChangePercent('1D', marketModel);
-                    _showModal(context, token, marketModel);
+                    _showModal(context, marketModel);
                   },
                   child: Padding(
-                    padding: const EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.only(
+                        top: 10.0, bottom: 10.0, right: 10.0, left: 10.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -277,29 +316,35 @@ class HomePage extends StatelessWidget {
                           children: [
                             Image.network(
                               marketModel.image,
-                              width: 30.0,
+                              width: 35.0,
                               errorBuilder: (context, error, stackTrace) {
                                 return Image.asset(
                                   'assets/images/logo.png',
-                                  width: 30.0,
+                                  width: 35.0,
                                 );
                               },
                             ),
                             const SizedBox(
                               width: 10.0,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  token.contractName,
-                                  textScaleFactor: 1.2,
-                                ),
-                                Text(
-                                  token.contractTickerSymbol,
-                                  style: TextStyle(color: Colors.grey[500]),
-                                ),
-                              ],
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.35,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    marketModel.name,
+                                    textScaleFactor: 1.0,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    marketModel.symbol,
+                                    style: TextStyle(color: Colors.grey[500]),
+                                    textScaleFactor: 0.9,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
                             )
                           ],
                         ),
@@ -308,13 +353,17 @@ class HomePage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              '$currencyCode ${(tokenService.tokenMarketData[index].currentPrice * (double.parse(token.balance) / pow(10, token.contractDecimals))).toStringAsFixed(2)}',
+                              '$currencyCode ${NumberFormat.decimalPattern().format(totalValue)}',
+                              textScaleFactor: 0.9,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               NumberFormat.compact(locale: 'en_US').format(
-                                  (double.parse(token.balance) /
-                                      pow(10, token.contractDecimals))),
+                                (double.parse(marketModel.balance) /
+                                    pow(10, marketModel.contractDecimals)),
+                              ),
                               style: TextStyle(color: Colors.grey[500]),
+                              textScaleFactor: 0.9,
                             ),
                           ],
                         ),
@@ -323,7 +372,8 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 const Divider(
-                  color: Colors.black38,
+                  color: Colors.black26,
+                  thickness: 0.2,
                 ),
               ],
             );
@@ -333,8 +383,7 @@ class HomePage extends StatelessWidget {
     }
   }
 
-  void _showModal(
-      BuildContext context, Token token, TokenMarketModel tokenMarketData) {
+  void _showModal(BuildContext context, TokenMarketModel tokenMarketData) {
     final userService = Provider.of<UserService>(context, listen: false);
     final tokenService = Provider.of<TokenService>(context, listen: false);
     String currecny = userService.sharedPreferences.getString('currency')!;
@@ -374,11 +423,11 @@ class HomePage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              token.contractName,
+                              tokenMarketData.name,
                               textScaleFactor: 1.2,
                             ),
                             Text(
-                              token.contractTickerSymbol,
+                              tokenMarketData.symbol,
                               style: TextStyle(color: Colors.grey[500]),
                             ),
                           ],
@@ -399,92 +448,138 @@ class HomePage extends StatelessWidget {
                           child: Icon(
                             Icons.close,
                             color: Colors.white,
+                            size: 17.0,
                           ),
                         ),
                       ),
                     )
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('price'),
-                    Text(
-                        '$currecnySymbol${tokenMarketData.currentPrice.toStringAsFixed(2)}'),
-                  ],
+                const SizedBox(
+                  height: 10.0,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('price'),
+                      Text('$currecnySymbol${tokenMarketData.currentPrice}'),
+                    ],
+                  ),
                 ),
                 const Divider(
-                  color: Colors.black38,
+                  color: Colors.black26,
+                  thickness: 0.2,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Total ${token.contractTickerSymbol}'),
-                    Text((double.parse(token.balance) /
-                            pow(10, token.contractDecimals))
-                        .toStringAsFixed(2)),
-                  ],
-                ),
-                const Divider(
-                  color: Colors.black38,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Total $currecny value'),
-                    Text(
-                        '$currecnySymbol${(tokenMarketData.currentPrice * (double.parse(token.balance) / pow(10, token.contractDecimals))).toStringAsFixed(2)}'),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total ${tokenMarketData.symbol}'),
+                      Text((double.parse(tokenMarketData.balance) /
+                              pow(10, tokenMarketData.contractDecimals))
+                          .toStringAsFixed(2)),
+                    ],
+                  ),
                 ),
                 const Divider(
-                  color: Colors.black38,
+                  color: Colors.black26,
+                  thickness: 0.2,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Market Cap'),
-                    Text(
-                      '$currecnySymbol ${NumberFormat.decimalPattern().format(tokenMarketData.marketCap)}',
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total $currecny value'),
+                      Text(
+                          '$currecnySymbol${(tokenMarketData.currentPrice * (double.parse(tokenMarketData.balance) / pow(10, tokenMarketData.contractDecimals))).toStringAsFixed(2)}'),
+                    ],
+                  ),
                 ),
                 const Divider(
-                  color: Colors.black38,
+                  color: Colors.black26,
+                  thickness: 0.2,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Text('% Change'),
-                        TextButton(
-                          onPressed: () {
-                            tokenService.getTokenChangePercent(
-                                '1D', tokenMarketData);
-                            setState(() {});
-                          },
-                          child: const Text('1D'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            tokenService.getTokenChangePercent(
-                                '1W', tokenMarketData);
-                            setState(() {});
-                          },
-                          child: const Text('1W'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            tokenService.getTokenChangePercent(
-                                '1M', tokenMarketData);
-                            setState(() {});
-                          },
-                          child: const Text('1M'),
-                        ),
-                      ],
-                    ),
-                    Text(tokenService.selectedPerecet.toStringAsFixed(2)),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Market Cap'),
+                      Text(
+                        '$currecnySymbol ${NumberFormat.decimalPattern().format(tokenMarketData.marketCap)}',
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(
+                  color: Colors.black26,
+                  thickness: 0.2,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Text('% Change'),
+                          const SizedBox(
+                            width: 5.0,
+                          ),
+                          SizedBox(
+                            width: 40.0,
+                            child: TextButton(
+                              onPressed: () {
+                                tokenService.getTokenChangePercent(
+                                    '1D', tokenMarketData);
+                                setState(() {});
+                              },
+                              child: const Text('1D'),
+                              style: TextButton.styleFrom(
+                                  backgroundColor: Colors.grey.shade200),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 5.0,
+                          ),
+                          SizedBox(
+                            width: 40.0,
+                            child: TextButton(
+                              onPressed: () {
+                                tokenService.getTokenChangePercent(
+                                    '1W', tokenMarketData);
+                                setState(() {});
+                              },
+                              child: const Text('1W'),
+                              style: TextButton.styleFrom(
+                                  backgroundColor: Colors.grey.shade200),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 5.0,
+                          ),
+                          SizedBox(
+                            width: 40.0,
+                            child: TextButton(
+                              onPressed: () {
+                                tokenService.getTokenChangePercent(
+                                    '1M', tokenMarketData);
+                                setState(() {});
+                              },
+                              child: const Text('1M'),
+                              style: TextButton.styleFrom(
+                                  backgroundColor: Colors.grey.shade200),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(tokenService.selectedPerecet.toStringAsFixed(2)),
+                    ],
+                  ),
                 ),
               ],
             ),
