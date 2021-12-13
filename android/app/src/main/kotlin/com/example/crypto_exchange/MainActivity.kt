@@ -1,4 +1,4 @@
-package com.example.crypto_exchange
+package com.metamancoin.metamanapp
 
 import io.flutter.embedding.android.FlutterActivity
 

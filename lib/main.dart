@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'MetaMan',
+        title: 'Meta Man',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           fontFamily: 'Montserrat',
