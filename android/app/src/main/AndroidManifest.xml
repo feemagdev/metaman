@@ -2,7 +2,7 @@
     package="com.metamancoin.metamanapp">
     <uses-permission android:name="android.permission.INTERNET" />
    <application
-        android:label="Meta Man"
+        android:label="MetaMan"
         android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
