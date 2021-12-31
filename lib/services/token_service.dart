@@ -18,12 +18,13 @@ class TokenService with ChangeNotifier {
   bool tokenLoading = true;
   double change24hPercent = 0.0;
   List<TokenMarketModel> tokenMarketData = [];
+  bool metaManInfoLoading = true;
+  MetaManInfo? metaManInfo;
 
   getTokens(String address) async {
     final apiUrl =
         'https://stg-api.unmarshal.io/v1/bsc/address/$address/assets?auth_key=${ApiKeys.tokenApi}';
     final response = await http.get(Uri.parse(apiUrl));
-
     List<dynamic> data = jsonDecode(response.body);
     tokens = [];
     totaCurrenctlValue = 0.0;
@@ -79,6 +80,7 @@ class TokenService with ChangeNotifier {
         }
       }
     });
+    await getMetaManCoinInfo();
     notifyListeners();
   }
 
@@ -152,6 +154,21 @@ class TokenService with ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<void> getMetaManCoinInfo() async {
+    const metaManInfoUrl =
+        'https://api.nomics.com/v1/currencies/ticker?key=${ApiKeys.nomicsApi}&ids=METAMAN&convert=USD&interval=interval=1h,1d,7d,30d,365d';
+    final response = await http.get(Uri.parse(metaManInfoUrl));
+    List<dynamic> data = jsonDecode(response.body);
+    dynamic dataList = data[0];
+    dynamic chnageIn1day = dataList['1d'] ?? '';
+    metaManInfo = MetaManInfo(
+        price: dataList['price'],
+        changeIn1h: chnageIn1day['price_change_pct'] ?? '',
+        rank: dataList['rank']);
+    metaManInfoLoading = false;
+    notifyListeners();
+  }
 }
 
 class TokensID {
@@ -160,4 +177,13 @@ class TokensID {
   final String balance;
 
   TokensID({required this.id, required this.decimal, required this.balance});
+}
+
+class MetaManInfo {
+  final String price;
+  final String changeIn1h;
+  final String rank;
+
+  MetaManInfo(
+      {required this.price, required this.changeIn1h, required this.rank});
 }

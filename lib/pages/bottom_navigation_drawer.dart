@@ -51,7 +51,7 @@ class _BscWalletPageState extends State<BscWalletPage> {
         ),
         BottomNavigationBarItem(
           backgroundColor: Colors.white,
-          icon: Icon(Icons.feed),
+          icon: Icon(Icons.track_changes_outlined),
           label: '',
         ),
         BottomNavigationBarItem(
@@ -77,6 +77,8 @@ class _BscWalletPageState extends State<BscWalletPage> {
       onTap: (int index) {
         if (index == 0) {
           tokenService.tokenLoading = true;
+        } else if (index == 1) {
+          tokenService.metaManInfoLoading = true;
         }
         setState(() {
           _selectedIndex = index;
