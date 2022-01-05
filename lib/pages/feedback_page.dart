@@ -1,4 +1,5 @@
 import 'package:crypto_exchange/services/token_service.dart';
+import 'package:crypto_exchange/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,9 +9,11 @@ class FeedBackPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokenService = Provider.of<TokenService>(context);
+    final userService = Provider.of<UserService>(context);
 
     if (tokenService.metaManInfoLoading) {
-      tokenService.getMetaManCoinInfo();
+      String currecncy = userService.sharedPreferences.getString('currency')!;
+      tokenService.getMetaManCoinInfo2(currecncy);
     }
     return tokenService.metaManInfoLoading
         ? Scaffold(
@@ -84,7 +87,7 @@ class FeedBackPage extends StatelessWidget {
                                   height: 5.0,
                                 ),
                                 const Text(
-                                  'Chnage in 24h',
+                                  'Change in 24h',
                                   textScaleFactor: 0.9,
                                   style: TextStyle(color: Colors.grey),
                                 ),
@@ -94,7 +97,8 @@ class FeedBackPage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  '\$' + tokenService.metaManInfo!.price,
+                                  '${userService.sharedPreferences.getString('currency_symbol')}' +
+                                      tokenService.metaManInfo!.price,
                                   textScaleFactor: 0.9,
                                 ),
                                 const SizedBox(

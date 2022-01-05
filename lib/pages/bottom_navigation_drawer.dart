@@ -32,7 +32,10 @@ class _BscWalletPageState extends State<BscWalletPage> {
     ];
     return SafeArea(
       child: Scaffold(
-        bottomNavigationBar: _bottomNavigationBar(tokenService, userService),
+        bottomNavigationBar: BottomAppBar(
+          elevation: 10.0,
+          child: _bottomNavigationBar(tokenService, userService),
+        ),
         body: _widgetOptions.elementAt(_selectedIndex),
       ),
     );
@@ -84,7 +87,6 @@ class _BscWalletPageState extends State<BscWalletPage> {
           _selectedIndex = index;
         });
       },
-      elevation: 5.0,
     );
   }
 }

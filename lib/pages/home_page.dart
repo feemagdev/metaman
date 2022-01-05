@@ -207,59 +207,6 @@ class HomePage extends StatelessWidget {
     }
   }
 
-  // Widget _createChart(
-  //   List<HighLow> highLowData,
-  //   BscService bsc,
-  // ) {
-  //   return Column(
-  //     children: [
-  //       Row(
-  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           TextButton(
-  //             onPressed: () {
-  //               bsc.getChartData('d');
-  //             },
-  //             child: const Text('DAY'),
-  //             style: TextButton.styleFrom(),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               bsc.getChartData('w');
-  //             },
-  //             child: const Text('WEEK'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               bsc.getChartData('m');
-  //             },
-  //             child: const Text('MONTH'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               bsc.getChartData('y');
-  //             },
-  //             child: const Text('YEAR'),
-  //           ),
-  //         ],
-  //       ),
-  //       SfCartesianChart(
-  //         tooltipBehavior: TooltipBehavior(enable: true),
-  //         primaryXAxis:
-  //             CategoryAxis(edgeLabelPlacement: EdgeLabelPlacement.shift),
-  //         series: <ChartSeries>[
-  //           LineSeries<HighLow, String>(
-  //             dataSource: highLowData,
-  //             color: Colors.blue,
-  //             xValueMapper: (HighLow time, _) => time.time,
-  //             yValueMapper: (HighLow price, _) => price.price,
-  //           )
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
-
   Widget _getTokens(TokenService tokenService, String? currencyCode,
       UserService userService) {
     if (tokenService.tokenLoading) {
@@ -286,6 +233,8 @@ class HomePage extends StatelessWidget {
         ),
       );
     } else {
+      tokenService.tokenMarketData
+          .sort((a, b) => b.marketCap.compareTo(a.marketCap));
       return Expanded(
         child: ListView.builder(
           itemCount: tokenService.tokenMarketData.length,
